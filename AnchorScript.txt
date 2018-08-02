@@ -1,0 +1,53 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AnchorScript : MonoBehaviour {
+    private Rigidbody2D rb;
+    private float xPosition;
+    private float yPosition;
+    private int nextAppearance;
+    private int timeCounter;
+    private bool isOnProcess = false;
+    public float speed = 1f;
+    private float downLimit = -8.71f;
+    private float upperLimit = 8.61f;
+
+    // Use this for initialization
+    void Start () {
+        xPosition = Random.Range(-8.37f, 8.28f);
+        yPosition = 22.35f;
+        nextAppearance = (int)Random.Range(5, 10);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (GameManager.instance.level < 3)
+            return;
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            if (Player.alive && !Player.frozen)
+            {
+                transform.position = new Vector2(transform.position.x, transform.position.y - 0.025f * speed);
+                if (transform.position.y <= -7.84 && Enemy.counter % nextAppearance == 0)
+                {
+                    respawn();
+                    nextAppearance = (int)Random.Range(3f, 10f);
+                }
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(GetPosition(), yPosition);
+    }
+
+    private float GetPosition()
+    {
+        return Random.Range(downLimit, upperLimit);
+
+    }
+}

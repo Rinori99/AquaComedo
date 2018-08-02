@@ -1,0 +1,53 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Piranha : MonoBehaviour {
+
+    private Rigidbody2D rb;
+    private int counter = 0;
+    private int nextAppearance;
+    private int initialDelay;
+    private bool delayFinished;
+    private float maxRate = 0.2f;
+    private float moveRate = 0.08f;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        nextAppearance = Random.Range(1, 8);
+        //initialDelay = Random.Range(2, 20);
+    }
+
+    void Update()
+    {
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            counter++;
+            if (Player.alive && !Player.frozen)
+            {
+                transform.position = new Vector2(transform.position.x -  0.5f*moveRate, transform.position.y);
+                if(moveRate < maxRate)
+                {
+                    moveRate += 0.01f;
+                }
+                if (transform.position.x <= -12.6 && Enemy.counter % nextAppearance == 0)
+                {
+                    respawn();
+                    nextAppearance = Random.Range(1, 8);
+                }
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(15f, GetPosition());
+    }
+
+    private float GetPosition()
+    {
+        return Random.Range(-Enemy.upperLimit, Enemy.upperLimit);
+        
+    }
+}

@@ -1,0 +1,63 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Shark : MonoBehaviour {
+
+    private Rigidbody2D rb;
+    public float speed = 0.7f;
+    private int counter = 0;
+    private int nextAppearance;
+    private float moveRate = 0.08f;
+    private float maxRate = 0.15f;
+    private int initialDelay;
+    private bool delayFinished;
+
+    // Use this for initialization
+    void Start () {
+        rb = GetComponent<Rigidbody2D>();
+        nextAppearance = Random.Range(1, 8);
+        //initialDelay = Random.Range(2, 20);
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if (GameManager.instance.level%2 ==1)
+            return;
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            counter++;
+          //  if (initialDelay * 60 != counter && !delayFinished && (GameManager.instance.score < 20 || GameManager.instance.score > 40))
+         //   {
+           //     return;
+         //s   }
+           // delayFinished = true;
+            if (Player.alive && !Player.frozen)
+            {
+                transform.position = new Vector2(transform.position.x - moveRate * speed, transform.position.y);
+                if (transform.position.x <= -12.6 && Enemy.counter % nextAppearance == 0){
+                    respawn();
+                    nextAppearance = Random.Range(1, 3);
+                    speed = Random.Range(1, 1.5f);
+                    if (counter % 2 == 0 && moveRate <= maxRate)
+                    {
+                        moveRate += 0.01f;
+                        counter = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(14.75f, GetPosition());
+    }
+
+    private float GetPosition()
+    {
+        return Random.Range(-Enemy.upperLimit, Enemy.upperLimit);
+
+    }
+}

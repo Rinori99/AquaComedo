@@ -1,0 +1,69 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Star : MonoBehaviour {
+    private Rigidbody2D rb;
+    private int nextAppearance;
+    private int speed = 1;
+    private float downLimit = -8.71f;
+    private float upperLimit = 8.61f;
+    private int counter;
+    private float xPosition;
+    private float yPosition;
+    private int waitTime = 5;
+    private int delta = -1;
+    // Use this for initialization
+    void Start () {
+        xPosition = Random.Range(-8.37f, 8.28f);
+        yPosition = 22.35f;
+        nextAppearance = (int)Random.Range(8, 20);
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if (GameManager.instance.level < 3)
+            return;
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            if (Player.alive)
+            {
+                if (GameManager.instance.score < 20)
+                    return;
+
+                if (counter - delta == waitTime * 60 && delta != -1)
+                {
+                    respawn();
+                    return;
+                }
+
+                counter++;
+                if (transform.position.y >= -4.48)
+                {
+                    transform.position = new Vector2(transform.position.x, transform.position.y - 0.025f * speed);
+                    nextAppearance = Random.Range(8, 20);
+                    delta = counter;
+                }
+
+                if (Player.frozen && counter % nextAppearance == 0)
+                {
+                    respawn();
+                    counter = 0;
+                }
+
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(GetPosition(), yPosition);
+    }
+
+    private float GetPosition()
+    {
+        return Random.Range(downLimit, upperLimit);
+
+    }
+}

@@ -1,0 +1,175 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class Player : MonoBehaviour {
+    private Enemy enemy;
+    private Rigidbody2D rb;
+    public int score;
+    private float lastEaten = 0;
+    private float currentMagnitude;
+    public float speed = 3f;
+    private bool isLeft;
+    public static bool alive = true;
+    public bool collisionOn = true;
+    public static float lastXPosition;
+    public static float lastYPosition;
+    public static float currentXPosition;
+    public static float currentYPosition;
+    public static bool bubbled;
+    public static int health = 1;
+    public static bool frozen;
+    public static float frozenTime = 5;
+    public static int clock;
+    public static int delta = -1;
+
+    public static Player instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    // Use this for initialization
+    void Start () {
+        rb = GetComponent<Rigidbody2D>();
+
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            clock++;
+            if (frozen && delta == -1)
+            {
+                delta = clock;
+            }
+
+            if (frozen && clock - delta == frozenTime * 60)
+            {
+                frozen = false;
+                delta = -1;
+            }
+
+            if (alive)
+            {
+
+                currentXPosition = transform.position.x;
+                currentYPosition = transform.position.y;
+            }
+
+            if (transform.position.x <= -8.78f)
+                transform.position = new Vector2(-8.78f, transform.position.y);
+            if (transform.position.y <= -4.08f)
+                transform.position = new Vector2(transform.position.x, -4.08f);
+            if (transform.position.x >= 8.78f)
+                transform.position = new Vector2(8.78f, transform.position.y);
+            if (transform.position.y >= 4.08f)
+                transform.position = new Vector2(transform.position.x, 4.08f);
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                Vector2 theScale = transform.localScale;
+                if (!isLeft)
+                {
+                    theScale.x *= -1;
+                    isLeft = true;
+                }
+
+                transform.localScale = theScale;
+            }
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                Vector2 theScale = transform.localScale;
+                if (isLeft)
+                {
+                    theScale.x *= -1;
+                    isLeft = false;
+                }
+
+                transform.localScale = theScale;
+            }
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                collisionOn = !collisionOn;
+            }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+
+        //speed += (GameManager.instance.level-1) * 0.01f;
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            float moveHorizontal = Input.GetAxis("Horizontal");
+            float moveVertical = Input.GetAxis("Vertical");
+            transform.Translate(new Vector2(moveHorizontal, moveVertical) * Time.deltaTime * speed);
+            //Vector2 movement = new Vector2(moveHorizontal, moveVertical);
+            //rb.AddForce(movement * 10);
+        }
+        
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "enemy")
+        {
+            //TextScript.scoreValue++;
+            int score = (int)GameManager.instance.levelProgressCounter;
+            int dif = score + 3 - (int)GameManager.instance.scoreTillNextLevel;
+            if (dif > 0) {
+                GameManager.instance.addScore(3-dif);
+                GameManager.instance.addScore(dif);
+            }
+            else
+            {
+                GameManager.instance.addScore(3);
+            }
+            
+        }
+        else if (other.gameObject.tag == "worm")
+        {
+            int score = (int)GameManager.instance.levelProgressCounter;
+            int dif = score + 2 - (int)GameManager.instance.scoreTillNextLevel;
+            if (dif > 0)
+            {
+                GameManager.instance.addScore(2 - dif);
+                GameManager.instance.addScore(dif);
+            }
+            else
+            {
+                GameManager.instance.addScore(2);
+            }
+            
+            //TextScript.scoreValue += 2;
+        }
+        else if (other.gameObject.tag == "deadly" && collisionOn)
+        {  
+            if(!bubbled)
+            {
+                die();
+            }
+        }
+        else if (other.gameObject.tag == "bubble")
+        {
+            Bubble.touched = false;
+            bubbled = true;
+        }
+        else if (other.gameObject.tag == "star" && !frozen)
+        {
+            frozen = true;
+        }
+    }
+
+    private void die() {
+        lastXPosition = transform.position.x;
+        lastYPosition = transform.position.y;
+        alive = false;
+        //GameManager.instance.replay();
+        Destroy(gameObject);
+        GameOver.instance.showGameOver();
+    }
+}

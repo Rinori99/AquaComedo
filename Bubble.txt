@@ -1,0 +1,71 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Bubble : MonoBehaviour {
+
+    private Rigidbody2D rb;
+    public float speed = 1;
+    public static bool touched;
+
+    private int nextAppearance;
+
+    // Use this for initialization
+    void Start () {
+        rb = GetComponent<Rigidbody2D>();
+        nextAppearance = (int)Random.Range(2f, 8f);
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if (GameManager.instance.level < 4)
+            return;
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            if (touched)
+            {
+                respawn();
+                return;
+            }
+
+            if (Player.bubbled)
+            {
+                transform.position = new Vector2(Player.currentXPosition, Player.currentYPosition);
+            }
+            else
+            {
+                transform.position = new Vector2(transform.position.x - 0.15f * speed, transform.position.y);
+            }
+
+            if (transform.position.x <= -12.6 && Enemy.counter % nextAppearance == 0 && GameManager.instance.score > 20)
+            {
+                respawn();
+                nextAppearance = (int)Random.Range(5f, 10f);
+                speed = Random.Range(1, 1.5f);
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(19.42f, GetPosition());
+        touched = false;
+    }
+
+    private float GetPosition()
+    {
+        return Random.Range(-Enemy.upperLimit, Enemy.upperLimit);
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.gameObject.tag == "deadly" && Player.bubbled)
+        {
+            Player.bubbled = false;
+            Bubble.touched = true;
+            Destroy(other.gameObject);
+        }
+    }
+}

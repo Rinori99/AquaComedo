@@ -1,0 +1,92 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Meduza : MonoBehaviour {
+
+    public static float upperLimit = 4.15f;
+    private Rigidbody2D rb;
+    public float speed = 1;
+    public static int counter = 0;
+    public float maxSpeed = 3.5f;
+    private int clock;
+    private int rate = 30;
+    private float yPos;
+
+    // Use this for initialization
+    void Start () {
+        rb = GetComponent<Rigidbody2D>();
+        yPos = GetPosition();
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if(GameManager.instance.level < 3 || GameManager.instance.level % 2 == 1)
+
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            if (GameManager.instance.score < 40 || GameManager.instance.score > 60)
+                return;
+
+            clock++;
+            if (clock >= rate)
+            {
+                yPos = Random.Range(-6f, 6f);
+                clock = 0;
+
+            }
+            if (Player.alive && !Player.frozen)
+            {
+                if (yPos <= transform.position.y)
+                {
+                    transform.position = new Vector2(transform.position.x - 0.2f * speed, transform.position.y - 0.1f);
+                }
+                else
+                {
+                    transform.position = new Vector2(transform.position.x - 0.2f * speed, transform.position.y + 0.1f);
+                }
+
+                if (transform.position.y <= -4.15f || transform.position.y >= 4.15f)
+                {
+                    yPos = GetPosition();
+                }
+
+
+                if (transform.position.x <= -12.6 && (GameManager.instance.score > 40 && GameManager.instance.score < 60))
+                {
+                    respawn();
+                }
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(12.6f, yPos);
+        counter++;
+        if (counter == 5)
+        {
+            counter = 0;
+            if (speed < maxSpeed)
+            {
+                speed += 0.05f;
+            }
+
+        }
+    }
+
+    private float GetPosition()
+    {
+        float f = Random.Range(-upperLimit, upperLimit);
+        return f;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            respawn();
+        }
+
+    }
+}

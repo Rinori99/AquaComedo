@@ -1,0 +1,39 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SkeletonScript : MonoBehaviour {
+    public float rotationsPerMinute = 8f;
+    private float xPosition;
+    private float yPosition;
+    public static SkeletonScript instance;
+
+    // Use this for initialization
+    void Start () {
+        transform.position = new Vector2(-12.43f, 8.53f);
+    }
+
+    private void Awake(){
+        instance = this;
+    }
+
+    // Update is called once per frame
+    void Update () {
+        transform.Rotate(0, 6.0f * rotationsPerMinute * Time.deltaTime, 0);
+        if (!Player.alive)
+        {
+            setOnScreen();
+        }
+        else {
+            removeFromScreen();
+        }
+    }
+
+    private void setOnScreen() { 
+        transform.position = new Vector2(Player.lastXPosition, Player.lastYPosition);
+    }
+
+    public void removeFromScreen() {
+        transform.position = new Vector2(-12.43f, 8.53f);
+    }
+}

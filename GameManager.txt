@@ -1,0 +1,83 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager instance;
+
+    public int score;
+    public int highscore;
+    public int level = 1;
+
+    public float scoreTillNextLevel = 30;
+    public float levelProgressCounter = 0;
+
+    public Scrollbar scrollBar;
+    public Text scoreText;
+    public Text highscoreText;
+    public Text levelText; 
+
+    private void Awake()
+    {
+        instance = this;
+        highscore = PlayerPrefs.GetInt("Highscore");
+        highscoreText.text = "Highscore: " + highscore;
+    }
+
+    public void addScore(int _score)
+    {
+        score += _score;
+        scoreText.text = "Score: " + score;
+
+        levelProgressCounter += _score;
+
+        scrollBar.size = levelProgressCounter / scoreTillNextLevel;
+
+        if (levelProgressCounter >= scoreTillNextLevel){
+            levelProgressCounter = 0;
+            incrLevel();
+        }
+
+        if(score > highscore){
+            setHighscore(score);
+        }
+    }
+
+    public void setHighscore(int _highscore)
+    {
+        highscore = _highscore;
+        highscoreText.text = "Highscore: " + highscore;
+        PlayerPrefs.SetInt("Highscore", highscore);
+    }
+
+    public void incrLevel()
+    {
+        level++;
+        levelText.text = "Level: " + level;
+       // Player.instance.speed += (level-1) * 0.01f;
+    }
+
+    private void backToMainMenu()
+    {
+        Player.alive = true;
+        SceneManager.LoadScene(0);
+    }
+
+    public void BackToMainMenu() {
+        Invoke("backToMainMenu", 1f);
+    }
+
+    public void replay()
+    {
+        Invoke("replayGame", 1f);
+    }
+
+    private void replayGame()
+    {
+        Player.alive = true;
+        SceneManager.LoadScene(1);
+    }
+}

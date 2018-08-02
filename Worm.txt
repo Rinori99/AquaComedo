@@ -1,0 +1,74 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Worm : MonoBehaviour {
+
+    public static float upperLimit = 4.15f;
+    private Rigidbody2D rb;
+    public float speed = 1;
+    public static int counter = 0;
+    public float maxSpeed = 3.5f;
+
+    // Use this for initialization
+    void Start () {
+        rb = GetComponent<Rigidbody2D>();
+    }
+	
+	// Update is called once per frame
+	void Update () {
+        if (!PauseMenu.instance.GameIsPaused)
+        {
+            if (Player.alive)
+            {
+                transform.position = new Vector2(transform.position.x - 0.35f * speed, transform.position.y);
+
+                if (transform.position.x <= -12.6)
+                {
+                    respawn();
+                }
+            }
+        }
+    }
+
+    private void respawn()
+    {
+        transform.position = new Vector2(12.6f, GetPosition());
+        counter++;
+        if (counter == 5)
+        {
+            counter = 0;
+            if (speed < maxSpeed)
+            {
+                speed += 0.05f;
+            }
+
+        }
+    }
+
+    private float GetPosition()
+    {
+        float f = Random.Range(-upperLimit, upperLimit);
+        return f;
+    }
+
+    private float GetScaleFactor()
+    {
+        float f = Random.Range(1 / 3f, 3f);
+        return f;
+    }
+
+    public float getScale()
+    {
+        return transform.localScale.magnitude;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            respawn();
+        }
+
+    }
+}
